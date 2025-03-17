@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request, HTTPException, Form, Depends, status, Cookie
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
 from typing import Optional, Dict, Any
@@ -23,7 +23,7 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # Create FastAPI app
 app = FastAPI(
-    title="NoorAI",
+    title="TafsirAI",
     description="Islamic Knowledge Assistant powered by AI",
     version="1.0.0",
 )
@@ -33,6 +33,20 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Set up Jinja2 templates
 templates = Jinja2Templates(directory="templates")
+
+# Default credits for new users
+DEFAULT_FREE_CREDITS = 3
+
+# Payment amount in rupees
+LIFETIME_ACCESS_COST = 89
+
+# Set up Razorpay (you'll need to sign up for a Razorpay account)
+import razorpay
+
+RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "rzp_test_zZDvredBawObm6")
+RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "gpfb8quY17d1E0ypTtHHaO1B")
+
+razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
 
 # Helper to get user profile
@@ -46,12 +60,41 @@ async def get_user_profile(access_token: str) -> Dict[Any, Any]:
         if user and user.user:
             print(f"User retrieved: {user.user.email}")
 
+            # Check if we have user metadata in our profiles table
+            user_id = user.user.id
+            profiles_data = (
+                supabase.table("profiles").select("*").eq("id", user_id).execute()
+            )
+
+            profile_data = {}
+            if profiles_data.data and len(profiles_data.data) > 0:
+                profile_data = profiles_data.data[0]
+            else:
+                # Create a profile entry if it doesn't exist
+                credits_remaining = DEFAULT_FREE_CREDITS
+                has_lifetime_access = False
+
+                new_profile = {
+                    "id": user_id,
+                    "credits_remaining": credits_remaining,
+                    "has_lifetime_access": has_lifetime_access,
+                    "created_at": datetime.now().isoformat(),
+                    "updated_at": datetime.now().isoformat(),
+                }
+
+                supabase.table("profiles").insert(new_profile).execute()
+                profile_data = new_profile
+
             # Create user profile dict
             user_data = {
                 "id": user.user.id,
                 "email": user.user.email,
                 "first_name": user.user.user_metadata.get("first_name", ""),
                 "last_name": user.user.user_metadata.get("last_name", ""),
+                "credits_remaining": profile_data.get(
+                    "credits_remaining", DEFAULT_FREE_CREDITS
+                ),
+                "has_lifetime_access": profile_data.get("has_lifetime_access", False),
             }
 
             return user_data
@@ -63,6 +106,49 @@ async def get_user_profile(access_token: str) -> Dict[Any, Any]:
         print(f"Error in get_user_profile: {str(e)}")
         # Return None on validation failure
         return None
+
+
+# Function to check if user can send a message
+async def check_user_credits(user_data):
+    if user_data.get("has_lifetime_access", False):
+        return True
+
+    if user_data.get("credits_remaining", 0) > 0:
+        return True
+
+    return False
+
+
+# Function to reduce user credit
+async def reduce_user_credit(user_id):
+    try:
+        # Get current profile
+        profile_data = (
+            supabase.table("profiles").select("*").eq("id", user_id).execute()
+        )
+
+        if profile_data.data and len(profile_data.data) > 0:
+            profile = profile_data.data[0]
+
+            # Skip if has lifetime access
+            if profile.get("has_lifetime_access", False):
+                return True
+
+            # Check and reduce credits
+            credits_remaining = profile.get("credits_remaining", 0)
+            if credits_remaining > 0:
+                supabase.table("profiles").update(
+                    {
+                        "credits_remaining": credits_remaining - 1,
+                        "updated_at": datetime.now().isoformat(),
+                    }
+                ).eq("id", user_id).execute()
+                return True
+
+        return False
+    except Exception as e:
+        print(f"Error in reduce_user_credit: {str(e)}")
+        return False
 
 
 # Routes
@@ -214,6 +300,9 @@ async def register(
             }
         )
 
+        # The profile is automatically created by the database trigger,
+        # so we don't need to create it here anymore.
+
         # Redirect to login with success message
         response = RedirectResponse(
             url="/login?message=Registration+successful!+You+can+now+log+in.&message_type=success",
@@ -263,10 +352,21 @@ async def chat_page(request: Request, access_token: Optional[str] = Cookie(None)
 
         # For debugging - print user data (remove in production)
         print(f"User authenticated successfully: {user.get('email')}")
+        print(f"Credits remaining: {user.get('credits_remaining')}")
+        print(f"Has lifetime access: {user.get('has_lifetime_access')}")
+
+        # Add Razorpay key to context
+        razorpay_key = RAZORPAY_KEY_ID
 
         # Render chat page with user data
         return templates.TemplateResponse(
-            "chat.html", {"request": request, "user": user}
+            "chat.html",
+            {
+                "request": request,
+                "user": user,
+                "razorpay_key": razorpay_key,
+                "payment_amount": LIFETIME_ACCESS_COST,
+            },
         )
     except Exception as e:
         # Log the specific error for debugging
@@ -294,6 +394,14 @@ async def ask_question(request: Request, access_token: Optional[str] = Cookie(No
         if not user:
             print("API request with invalid token")
             raise HTTPException(status_code=401, detail="Invalid authentication token")
+
+        # Check if user has credits or lifetime access
+        can_send = await check_user_credits(user)
+        if not can_send:
+            return {
+                "status": "credits_required",
+                "response": "You've used all your free credits. Please upgrade to continue using TafsirAI.",
+            }
 
         # Get the question from request body
         data = await request.json()
@@ -342,10 +450,32 @@ async def ask_question(request: Request, access_token: Optional[str] = Cookie(No
                 else:
                     response_data["response"] = str(response_data["response"])
 
+                # Reduce user credit after successful response
+                await reduce_user_credit(user["id"])
+
+                # Update user data
+                updated_user = await get_user_profile(access_token)
+                response_data["credits_remaining"] = updated_user.get(
+                    "credits_remaining", 0
+                )
+                response_data["has_lifetime_access"] = updated_user.get(
+                    "has_lifetime_access", False
+                )
+
                 return response_data
             else:
                 # If response is not a dict, wrap it
-                return {"status": "success", "response": str(response_data)}
+                reduced = await reduce_user_credit(user["id"])
+                updated_user = await get_user_profile(access_token)
+
+                return {
+                    "status": "success",
+                    "response": str(response_data),
+                    "credits_remaining": updated_user.get("credits_remaining", 0),
+                    "has_lifetime_access": updated_user.get(
+                        "has_lifetime_access", False
+                    ),
+                }
         except Exception as e:
             print(f"Error in agent processing: {str(e)}")
             return {
@@ -356,6 +486,119 @@ async def ask_question(request: Request, access_token: Optional[str] = Cookie(No
     except Exception as e:
         print(f"Error in API: {str(e)}")
         return {"status": "error", "response": f"An error occurred: {str(e)}"}
+
+
+# Create a payment order
+@app.post("/api/create-payment")
+async def create_payment(request: Request, access_token: Optional[str] = Cookie(None)):
+    # Check if user is logged in
+    if not access_token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    try:
+        # Validate token by getting user
+        user = await get_user_profile(access_token)
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid authentication token")
+
+        # Skip if user already has lifetime access
+        if user.get("has_lifetime_access", False):
+            return {"status": "error", "message": "You already have lifetime access"}
+
+        # Create a Razorpay order
+        payment_data = {
+            "amount": LIFETIME_ACCESS_COST * 100,  # amount in paise
+            "currency": "INR",
+            "receipt": f"receipt_{user['id'][:8]}",
+            "notes": {"user_id": user["id"], "email": user["email"]},
+        }
+
+        order = razorpay_client.order.create(payment_data)
+
+        return {
+            "status": "success",
+            "order_id": order["id"],
+            "amount": order["amount"],
+            "currency": order["currency"],
+            "key": RAZORPAY_KEY_ID,
+        }
+
+    except Exception as e:
+        print(f"Error creating payment: {str(e)}")
+        return {"status": "error", "message": f"Error creating payment: {str(e)}"}
+
+
+# Verify payment
+@app.post("/api/verify-payment")
+async def verify_payment(request: Request, access_token: Optional[str] = Cookie(None)):
+    # Check if user is logged in
+    if not access_token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    try:
+        # Validate token by getting user
+        user = await get_user_profile(access_token)
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid authentication token")
+
+        # Get payment data
+        data = await request.json()
+        payment_id = data.get("razorpay_payment_id", "")
+        order_id = data.get("razorpay_order_id", "")
+        signature = data.get("razorpay_signature", "")
+
+        # Verify signature
+        params_dict = {
+            "razorpay_payment_id": payment_id,
+            "razorpay_order_id": order_id,
+            "razorpay_signature": signature,
+        }
+
+        try:
+            razorpay_client.utility.verify_payment_signature(params_dict)
+
+            # Payment is verified, update user to have lifetime access
+            supabase.table("profiles").update(
+                {"has_lifetime_access": True, "updated_at": datetime.now().isoformat()}
+            ).eq("id", user["id"]).execute()
+
+            # Also store payment details
+            payment_record = {
+                "user_id": user["id"],
+                "payment_id": payment_id,
+                "order_id": order_id,
+                "amount": LIFETIME_ACCESS_COST,
+                "status": "completed",
+                "created_at": datetime.now().isoformat(),
+            }
+
+            supabase.table("payments").insert(payment_record).execute()
+
+            return {
+                "status": "success",
+                "message": "Payment verified and lifetime access granted!",
+            }
+
+        except Exception as e:
+            # Invalid signature
+            # Store failed payment attempt
+            payment_record = {
+                "user_id": user["id"],
+                "payment_id": payment_id,
+                "order_id": order_id,
+                "amount": LIFETIME_ACCESS_COST,
+                "status": "failed",
+                "error": str(e),
+                "created_at": datetime.now().isoformat(),
+            }
+
+            supabase.table("payments").insert(payment_record).execute()
+
+            return {"status": "error", "message": "Payment verification failed"}
+
+    except Exception as e:
+        print(f"Error verifying payment: {str(e)}")
+        return {"status": "error", "message": f"Error verifying payment: {str(e)}"}
 
 
 # @app.get("/api/status")

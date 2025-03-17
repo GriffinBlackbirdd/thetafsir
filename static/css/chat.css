@@ -1675,6 +1675,31 @@
   .message-content .response-subheading-small {
     font-size: 1.5rem;
   }
+
+  .payment-modal-content {
+    padding: 2.5rem;
+  }
+
+  .upgrade-button {
+    padding: 1rem 2rem;
+    font-size: 1.4rem;
+  }
+
+  .payment-header h2,
+  .success-header h2,
+  .credit-header h2 {
+    font-size: 2.2rem;
+  }
+
+  .payment-details p,
+  .success-details p,
+  .credit-details p {
+    font-size: 1.5rem;
+  }
+
+  .price-tag {
+    font-size: 3.5rem;
+  }
 }
 
 @media screen and (max-width: 480px) {
@@ -1807,6 +1832,51 @@
   .message-content .response-subheading-small {
     font-size: 1.4rem;
   }
+
+  .payment-modal-content {
+    padding: 2rem;
+  }
+
+  .payment-icon,
+  .success-icon,
+  .credit-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .payment-header h2,
+  .success-header h2,
+  .credit-header h2 {
+    font-size: 2rem;
+  }
+
+  .payment-details p,
+  .success-details p,
+  .credit-details p {
+    font-size: 1.4rem;
+  }
+
+  .benefit-item {
+    padding: 1rem 1.5rem;
+  }
+
+  .benefit-item i {
+    font-size: 1.8rem;
+  }
+
+  .benefit-item span {
+    font-size: 1.4rem;
+  }
+
+  .price-tag {
+    font-size: 3rem;
+  }
+
+  .pay-button,
+  .continue-button {
+    padding: 1.2rem;
+    font-size: 1.5rem;
+  }
 }
 
 @keyframes fadeInMessage {
@@ -1822,4 +1892,356 @@
 
 .message {
   animation: fadeInMessage 0.3s ease-out forwards;
+}
+
+/* Credits and Payment Styling */
+
+/* Credit Panel */
+.credit-panel {
+  background: rgba(35, 10, 42, 0.4);
+  border-radius: 2rem;
+  padding: 2.5rem;
+  border: 1px solid rgba(192, 163, 110, 0.15);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.credit-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  font-size: 1.8rem;
+  color: var(--gold-primary);
+  margin-bottom: 2rem;
+  font-weight: 500;
+  position: relative;
+}
+
+.credit-title:after {
+  content: "";
+  position: absolute;
+  bottom: -0.8rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5rem;
+  height: 2px;
+  background: var(--gold-primary);
+  border-radius: 1px;
+}
+
+.credit-title i {
+  font-size: 2rem;
+  color: var(--gold-primary);
+}
+
+.credit-info {
+  text-align: center;
+}
+
+.credit-count {
+  margin: 1.5rem 0;
+}
+
+.credit-count span:first-child {
+  font-size: 4rem;
+  font-weight: 700;
+  color: var(--gold-primary);
+  display: block;
+  line-height: 1;
+}
+
+.credit-label {
+  font-size: 1.5rem;
+  color: var(--gray-light);
+  display: block;
+  margin-top: 0.5rem;
+}
+
+/* Progress Bar */
+.credit-progress {
+  margin: 2rem 0;
+}
+
+.progress-bar {
+  height: 0.8rem;
+  background: rgba(23, 5, 26, 0.8);
+  border-radius: 0.4rem;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(to right, var(--gold-dark), var(--gold-primary));
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 1.3rem;
+  color: var(--gray);
+  margin-top: 0.6rem;
+  text-align: center;
+}
+
+/* Upgrade Button */
+.upgrade-button-container {
+  margin-top: 2.5rem;
+}
+
+.upgrade-button {
+  background: var(--gradient-gold);
+  color: var(--black);
+  border: none;
+  border-radius: 3rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  padding: 1.2rem 2.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 0 auto;
+  transition: all var(--transition-medium);
+  box-shadow: 0 8px 15px rgba(192, 163, 110, 0.2);
+  font-family: var(--font-primary);
+}
+
+.upgrade-button i {
+  font-size: 1.8rem;
+}
+
+.upgrade-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 20px rgba(192, 163, 110, 0.3);
+}
+
+.upgrade-price {
+  font-size: 1.4rem;
+  color: var(--gold-light);
+  margin-top: 1rem;
+  opacity: 0.8;
+}
+
+/* Lifetime Badge */
+.lifetime-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 2rem auto;
+  background: rgba(59, 21, 74, 0.6);
+  padding: 1.2rem 2rem;
+  border-radius: 2rem;
+  width: fit-content;
+  border: 1px solid var(--gold-primary);
+}
+
+.lifetime-badge i {
+  font-size: 2rem;
+  color: var(--gold-primary);
+}
+
+.lifetime-badge span {
+  font-size: 1.5rem;
+  color: var(--gold-light);
+}
+
+/* Payment Modal */
+.payment-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  animation: fadeIn 0.3s forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.payment-modal-content {
+  background: rgba(35, 10, 42, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 2rem;
+  width: 90%;
+  max-width: 500px;
+  padding: 3rem;
+  border: 1px solid rgba(192, 163, 110, 0.2);
+  position: relative;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.4s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.close-modal,
+.close-success-modal,
+.close-credit-modal {
+  position: absolute;
+  top: 1.5rem;
+  right: 2rem;
+  font-size: 2.8rem;
+  color: var(--gray);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.close-modal:hover,
+.close-success-modal:hover,
+.close-credit-modal:hover {
+  color: var(--gold-primary);
+}
+
+.payment-header,
+.success-header,
+.credit-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.payment-icon,
+.success-icon,
+.credit-icon {
+  font-size: 3.5rem;
+  color: var(--gold-primary);
+  display: block;
+  margin-bottom: 1.5rem;
+}
+
+.success-icon {
+  font-size: 4rem;
+  color: #4dff4d;
+}
+
+.payment-header h2,
+.success-header h2,
+.credit-header h2 {
+  font-size: 2.4rem;
+  color: var(--white);
+  font-weight: 600;
+}
+
+.payment-details,
+.success-details,
+.credit-details {
+  text-align: center;
+}
+
+.payment-details p,
+.success-details p,
+.credit-details p {
+  font-size: 1.6rem;
+  color: var(--gray-light);
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+
+.payment-benefits {
+  margin: 2.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: rgba(59, 21, 74, 0.5);
+  padding: 1.2rem 1.8rem;
+  border-radius: 1.2rem;
+  border: 1px solid rgba(192, 163, 110, 0.15);
+  transition: all var(--transition-medium);
+}
+
+.benefit-item:hover {
+  background: rgba(59, 21, 74, 0.7);
+  transform: translateX(5px);
+  border-color: var(--gold-primary);
+}
+
+.benefit-item i {
+  font-size: 2rem;
+  color: var(--gold-primary);
+}
+
+.benefit-item span {
+  font-size: 1.5rem;
+  color: var(--white);
+}
+
+.payment-price {
+  margin: 3rem 0;
+}
+
+.price-tag {
+  font-size: 4rem;
+  font-weight: 700;
+  color: var(--gold-primary);
+}
+
+.price-note {
+  font-size: 1.4rem;
+  color: var(--gold-light);
+  opacity: 0.8;
+  margin-top: 0.5rem;
+}
+
+.pay-button,
+.continue-button {
+  width: 100%;
+  background: var(--gradient-gold);
+  color: var(--black);
+  border: none;
+  border-radius: 1.2rem;
+  padding: 1.5rem;
+  font-size: 1.6rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  transition: all var(--transition-medium);
+  box-shadow: 0 8px 20px rgba(192, 163, 110, 0.2);
+  font-family: var(--font-primary);
+}
+
+.pay-button i,
+.continue-button i {
+  font-size: 1.8rem;
+}
+
+.pay-button:hover,
+.continue-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(192, 163, 110, 0.3);
+}
+
+.continue-button {
+  background: linear-gradient(135deg, #3cb371, #2e8b57);
+  color: var(--white);
 }

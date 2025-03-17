@@ -27,6 +27,8 @@
       href="{{ url_for('static', path='/images/favicon.ico') }}"
       type="image/x-icon"
     />
+    <!-- Add Razorpay script -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   </head>
   <body class="chat-page">
     <!-- Header -->
@@ -122,9 +124,58 @@
 
           <!-- Sidebar column -->
           <div class="sidebar-column">
+            <!-- Credits information panel -->
+            <div class="credit-panel" id="credit-panel">
+              <div class="credit-title">
+                <i class="fas fa-coins"></i>
+                <span>Your Credits</span>
+              </div>
+
+              <div class="credit-info" id="credit-free-info">
+                <div class="credit-count">
+                  <span id="credits-remaining"
+                    >{{ user.credits_remaining if not user.has_lifetime_access
+                    else "∞" }}</span
+                  >
+                  <span class="credit-label"
+                    >{{ "free credits remaining" if not user.has_lifetime_access
+                    else "Lifetime Access" }}</span
+                  >
+                </div>
+
+                {% if not user.has_lifetime_access %}
+                <div class="credit-progress">
+                  <div class="progress-bar">
+                    <div
+                      class="progress-fill"
+                      style="width: {{ (user.credits_remaining / 3) * 100 }}%;"
+                    ></div>
+                  </div>
+                  <div class="progress-text">
+                    {{ user.credits_remaining }} of 3 free messages
+                  </div>
+                </div>
+
+                <div class="upgrade-button-container">
+                  <button id="upgrade-button" class="upgrade-button">
+                    <i class="fas fa-crown"></i> Upgrade to Lifetime Access
+                  </button>
+                  <div class="upgrade-price">
+                    Just ₹{{ payment_amount }} - One-time payment
+                  </div>
+                </div>
+                {% else %}
+                <div class="lifetime-badge">
+                  <i class="fas fa-check-circle"></i>
+                  <span>You have lifetime access!</span>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+
             <!-- Suggested questions section -->
             <div class="chat-suggestions" id="suggestions">
-              <div class="suggestion-title">Suggested Questions</div>
+              <!-- <div class="suggestion-title">Suggested Questions</div>
               <div class="suggestion-items">
                 <button class="suggestion-item">
                   <i class="fas fa-star-and-crescent"></i>
@@ -142,12 +193,113 @@
                   <i class="fas fa-kaaba"></i>
                   <span>What is the significance of Hajj?</span>
                 </button>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
       </div>
     </main>
+
+    <!-- Payment Modal -->
+    <div id="payment-modal" class="payment-modal">
+      <div class="payment-modal-content">
+        <span class="close-modal">&times;</span>
+        <div class="payment-header">
+          <i class="fas fa-crown payment-icon"></i>
+          <h2>Upgrade to Lifetime Access</h2>
+        </div>
+        <div class="payment-details">
+          <p>
+            You'll get unlimited access to TafsirAI for life with a one-time
+            payment.
+          </p>
+
+          <div class="payment-benefits">
+            <div class="benefit-item">
+              <i class="fas fa-infinity"></i>
+              <span>Unlimited messages</span>
+            </div>
+            <div class="benefit-item">
+              <i class="fas fa-bolt"></i>
+              <span>Priority access</span>
+            </div>
+            <div class="benefit-item">
+              <i class="fas fa-hand-holding-heart"></i>
+              <span>Support Islamic knowledge</span>
+            </div>
+          </div>
+
+          <div class="payment-price">
+            <div class="price-tag">₹{{ payment_amount }}</div>
+            <div class="price-note">One-time payment</div>
+          </div>
+        </div>
+        <button id="pay-button" class="pay-button">
+          <i class="fas fa-lock"></i> Pay Securely
+        </button>
+      </div>
+    </div>
+
+    <!-- Payment Success Modal -->
+    <div id="success-modal" class="payment-modal success-modal">
+      <div class="payment-modal-content">
+        <span class="close-success-modal">&times;</span>
+        <div class="success-header">
+          <i class="fas fa-check-circle success-icon"></i>
+          <h2>Payment Successful!</h2>
+        </div>
+        <div class="success-details">
+          <p>
+            Thank you for upgrading to lifetime access. You now have unlimited
+            messages with TafsirAI.
+          </p>
+          <p>May Allah bless you for supporting Islamic knowledge.</p>
+        </div>
+        <button id="continue-button" class="continue-button">
+          Continue Using TafsirAI
+        </button>
+      </div>
+    </div>
+
+    <!-- Credit Required Modal -->
+    <div id="credit-required-modal" class="payment-modal credit-required-modal">
+      <div class="payment-modal-content">
+        <span class="close-credit-modal">&times;</span>
+        <div class="credit-header">
+          <i class="fas fa-coins credit-icon"></i>
+          <h2>You've used all your free credits</h2>
+        </div>
+        <div class="credit-details">
+          <p>
+            To continue using TafsirAI, please upgrade to lifetime access with a
+            one-time payment.
+          </p>
+
+          <div class="payment-benefits">
+            <div class="benefit-item">
+              <i class="fas fa-infinity"></i>
+              <span>Unlimited messages forever</span>
+            </div>
+            <div class="benefit-item">
+              <i class="fas fa-bolt"></i>
+              <span>Priority access to future features</span>
+            </div>
+            <div class="benefit-item">
+              <i class="fas fa-hand-holding-heart"></i>
+              <span>Support the spread of Islamic knowledge</span>
+            </div>
+          </div>
+
+          <div class="payment-price">
+            <div class="price-tag">₹{{ payment_amount }}</div>
+            <div class="price-note">One-time payment only</div>
+          </div>
+        </div>
+        <button id="upgrade-now-button" class="pay-button">
+          <i class="fas fa-crown"></i> Upgrade Now
+        </button>
+      </div>
+    </div>
 
     <!-- Debug panel -->
     <!-- <button id="debug-toggle">Debug</button> -->
@@ -175,5 +327,254 @@
     <!-- Inline JavaScript -->
     <script src="{{ url_for('static', path='/js/moveButton.js') }}"></script>
     <script src="{{ url_for('static', path='/js/chat.js') }}"></script>
+
+    <!-- Payment Related Scripts -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Get elements
+        const upgradeButton = document.getElementById("upgrade-button");
+        const payButton = document.getElementById("pay-button");
+        const upgradeNowButton = document.getElementById("upgrade-now-button");
+        const paymentModal = document.getElementById("payment-modal");
+        const successModal = document.getElementById("success-modal");
+        const creditRequiredModal = document.getElementById("credit-required-modal");
+        const closeModal = document.querySelector(".close-modal");
+        const closeSuccessModal = document.querySelector(".close-success-modal");
+        const closeCreditModal = document.querySelector(".close-credit-modal");
+        const continueButton = document.getElementById("continue-button");
+
+        // User data from server
+        const userData = {
+          id: "{{ user.id }}",
+          firstName: "{{ user.first_name }}",
+          lastName: "{{ user.last_name }}",
+          email: "{{ user.email }}",
+          hasLifetimeAccess: {{ 'true' if user.has_lifetime_access else 'false' }},
+          creditsRemaining: {{ user.credits_remaining if not user.has_lifetime_access else '999' }}
+        };
+
+        // Payment data
+        const razorpayKey = "{{ razorpay_key }}";
+        const paymentAmount = {{ payment_amount }};
+
+        // Update credit display
+        function updateCreditDisplay(credits, hasLifetime) {
+          const creditsElement = document.getElementById("credits-remaining");
+          const creditLabel = document.querySelector(".credit-label");
+
+          if (hasLifetime) {
+            creditsElement.textContent = "∞";
+            creditLabel.textContent = "Lifetime Access";
+            document.getElementById("upgrade-button").style.display = "none";
+
+            // Add lifetime badge if it doesn't exist
+            if (!document.querySelector(".lifetime-badge")) {
+              const lifetimeBadge = document.createElement("div");
+              lifetimeBadge.className = "lifetime-badge";
+              lifetimeBadge.innerHTML = `
+                <i class="fas fa-check-circle"></i>
+                <span>You have lifetime access!</span>
+              `;
+
+              const creditInfo = document.getElementById("credit-free-info");
+              const progressBar = document.querySelector(".credit-progress");
+              if (progressBar) {
+                progressBar.remove();
+              }
+
+              const upgradeContainer = document.querySelector(".upgrade-button-container");
+              if (upgradeContainer) {
+                upgradeContainer.remove();
+              }
+
+              creditInfo.appendChild(lifetimeBadge);
+            }
+          } else {
+            creditsElement.textContent = credits;
+
+            // Update progress bar
+            const progressFill = document.querySelector(".progress-fill");
+            if (progressFill) {
+              progressFill.style.width = `${(credits / 3) * 100}%`;
+            }
+
+            const progressText = document.querySelector(".progress-text");
+            if (progressText) {
+              progressText.textContent = `${credits} of 3 free messages`;
+            }
+          }
+        }
+
+        // Show the payment modal
+        function showPaymentModal() {
+          paymentModal.style.display = "flex";
+        }
+
+        // Show the credit required modal
+        function showCreditRequiredModal() {
+          creditRequiredModal.style.display = "flex";
+        }
+
+        // Show the success modal
+        function showSuccessModal() {
+          successModal.style.display = "flex";
+        }
+
+        // Hide all modals
+        function hideAllModals() {
+          paymentModal.style.display = "none";
+          successModal.style.display = "none";
+          creditRequiredModal.style.display = "none";
+        }
+
+        // Create a Razorpay order
+        async function createPaymentOrder() {
+          try {
+            const response = await fetch('/api/create-payment', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            });
+
+            const data = await response.json();
+
+            if (data.status === "success") {
+              return data;
+            } else {
+              console.error("Error creating payment order:", data.message);
+              return null;
+            }
+          } catch (error) {
+            console.error("Error creating payment:", error);
+            return null;
+          }
+        }
+
+        // Verify a payment
+        async function verifyPayment(paymentData) {
+          try {
+            const response = await fetch('/api/verify-payment', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(paymentData)
+            });
+
+            const data = await response.json();
+            return data;
+          } catch (error) {
+            console.error("Error verifying payment:", error);
+            return { status: "error", message: "Payment verification failed" };
+          }
+        }
+
+        // Handle Razorpay payment
+        async function handlePayment() {
+          const orderData = await createPaymentOrder();
+
+          if (!orderData) {
+            alert("Failed to create payment order. Please try again.");
+            return;
+          }
+
+          const options = {
+            key: razorpayKey,
+            amount: orderData.amount,
+            currency: orderData.currency,
+            name: "TafsirAI",
+            description: "Lifetime Access to Islamic Knowledge",
+            order_id: orderData.order_id,
+            handler: async function (response) {
+              // Verify the payment
+              const verificationResult = await verifyPayment({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature
+              });
+
+              if (verificationResult.status === "success") {
+                // Update user data
+                userData.hasLifetimeAccess = true;
+
+                // Update UI
+                updateCreditDisplay(999, true);
+
+                // Show success modal
+                hideAllModals();
+                showSuccessModal();
+              } else {
+                alert("Payment verification failed. Please try again or contact support.");
+              }
+            },
+            prefill: {
+              name: `${userData.firstName} ${userData.lastName}`,
+              email: userData.email
+            },
+            theme: {
+              color: "#c0a36e"
+            }
+          };
+
+          const razorpayInstance = new Razorpay(options);
+          razorpayInstance.open();
+        }
+
+        // Event listeners
+        if (upgradeButton) {
+          upgradeButton.addEventListener("click", showPaymentModal);
+        }
+
+        if (payButton) {
+          payButton.addEventListener("click", handlePayment);
+        }
+
+        if (upgradeNowButton) {
+          upgradeNowButton.addEventListener("click", handlePayment);
+        }
+
+        if (closeModal) {
+          closeModal.addEventListener("click", function() {
+            paymentModal.style.display = "none";
+          });
+        }
+
+        if (closeSuccessModal) {
+          closeSuccessModal.addEventListener("click", function() {
+            successModal.style.display = "none";
+          });
+        }
+
+        if (closeCreditModal) {
+          closeCreditModal.addEventListener("click", function() {
+            creditRequiredModal.style.display = "none";
+          });
+        }
+
+        if (continueButton) {
+          continueButton.addEventListener("click", function() {
+            successModal.style.display = "none";
+          });
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener("click", function(event) {
+          if (event.target === paymentModal) {
+            paymentModal.style.display = "none";
+          }
+          if (event.target === successModal) {
+            successModal.style.display = "none";
+          }
+          if (event.target === creditRequiredModal) {
+            creditRequiredModal.style.display = "none";
+          }
+        });
+
+        // Expose functions to window for chat.js to use
+        window.showCreditRequiredModal = showCreditRequiredModal;
+        window.updateCreditDisplay = updateCreditDisplay;
+      });
+    </script>
   </body>
 </html>
