@@ -1,0 +1,29 @@
+[project]
+name = "ramadancompanion"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "agno>=1.1.13",
+    "chainlit>=2.2.1",
+    "chromadb>=0.6.3",
+    "google-genai>=1.5.0",
+    "numpy>=2.2.3",
+    "ollama>=0.4.7",
+    "openai>=1.66.3",
+    "pandas>=2.2.3",
+    "pydantic[email]>=2.10.6",
+    "pypdf>=5.3.1",
+    "rich>=13.9.4",
+    "sentencepiece>=0.2.0",
+    "streamlit>=1.43.1",
+    "supabase>=2.13.0",
+    "torch>=2.6.0",
+    "transformers>=4.49.0",
+    "typer>=0.15.2",
+    "watchdog>=6.0.0",
+]
+
+[tool.uv.workspace]
+members = ["opemManus"]

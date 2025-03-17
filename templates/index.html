@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NoorAI | Your Islamic Knowledge Companion</title>
+    <link
+      href="{{ url_for('static', path='css/styles.css') }}"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
+    <style>
+      .chat-simulation {
+        flex: 1;
+        max-width: 50rem;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .chat-window {
+        background: rgba(59, 21, 74, 0.3);
+        backdrop-filter: blur(10px);
+        border-radius: 2rem;
+        padding: 3rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(192, 163, 110, 0.1);
+        transition: all var(--transition-medium);
+        position: relative;
+        z-index: 2;
+        overflow: hidden;
+        min-height: 40rem;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .chat-window:hover {
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3),
+          0 0 0 1px rgba(192, 163, 110, 0.2) inset;
+      }
+
+      .chat-header {
+        display: flex;
+        align-items: center;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(192, 163, 110, 0.2);
+        margin-bottom: 2rem;
+      }
+
+      .chat-avatar {
+        width: 4rem;
+        height: 4rem;
+        background: var(--gradient-gold);
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-right: 1.5rem;
+      }
+
+      .chat-avatar i {
+        font-size: 2rem;
+        color: var(--black);
+      }
+
+      .chat-title {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--gold-primary);
+      }
+
+      .chat-messages {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        padding: 1rem 0;
+        flex: 1;
+      }
+
+      .message {
+        display: flex;
+        max-width: 90%;
+      }
+
+      .user-message {
+        margin-left: auto;
+        justify-content: flex-end;
+      }
+
+      .ai-message {
+        margin-right: auto;
+        justify-content: flex-start;
+      }
+
+      .message-avatar {
+        width: 3.5rem;
+        height: 3.5rem;
+        background: var(--gradient-gold);
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-right: 1rem;
+        flex-shrink: 0;
+      }
+
+      .message-avatar i {
+        font-size: 1.8rem;
+        color: var(--black);
+      }
+
+      .message-content {
+        padding: 1.5rem;
+        border-radius: 1.5rem;
+        font-size: 1.5rem;
+        line-height: 1.6;
+        position: relative;
+      }
+
+      .user-message .message-content {
+        background: rgba(192, 163, 110, 0.2);
+        color: var(--white);
+        border-bottom-right-radius: 0;
+      }
+
+      .ai-message .message-content {
+        background: rgba(23, 5, 26, 0.6);
+        color: var(--white);
+        border-bottom-left-radius: 0;
+      }
+
+      /* Typing indicator animation */
+      .typing-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .typing-indicator span {
+        width: 0.8rem;
+        height: 0.8rem;
+        background: var(--gold-primary);
+        border-radius: 50%;
+        display: inline-block;
+        opacity: 0.6;
+        animation: typing 1.5s infinite ease-in-out;
+      }
+
+      .typing-indicator span:nth-child(1) {
+        animation-delay: 0s;
+      }
+
+      .typing-indicator span:nth-child(2) {
+        animation-delay: 0.3s;
+      }
+
+      .typing-indicator span:nth-child(3) {
+        animation-delay: 0.6s;
+      }
+
+      @keyframes typing {
+        0%,
+        100% {
+          transform: translateY(0);
+          opacity: 0.6;
+        }
+        50% {
+          transform: translateY(-0.6rem);
+          opacity: 1;
+        }
+      }
+
+      /* Chat suggestion chips */
+      .chat-suggestion-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 3rem;
+      }
+
+      .suggestion-chip {
+        font-size: 1.4rem;
+        color: var(--gold-primary);
+        background: rgba(23, 5, 26, 0.6);
+        border: 1px solid rgba(192, 163, 110, 0.3);
+        padding: 0.8rem 1.5rem;
+        border-radius: 3rem;
+        cursor: pointer;
+        transition: all var(--transition-medium);
+        user-select: none;
+        animation: fadeInUp 0.5s forwards;
+        animation-delay: calc(var(--index) * 0.2s);
+        opacity: 0;
+        transform: translateY(1rem);
+      }
+
+      .suggestion-chip:nth-child(1) {
+        --index: 1;
+      }
+
+      .suggestion-chip:nth-child(2) {
+        --index: 2;
+      }
+
+      .suggestion-chip:nth-child(3) {
+        --index: 3;
+      }
+
+      .suggestion-chip:hover {
+        background: var(--gold-primary);
+        color: var(--black);
+        border-color: var(--gold-primary);
+        transform: translateY(-3px);
+      }
+
+      /* Chat decoration */
+      .chat-decoration {
+        position: absolute;
+        top: -3rem;
+        right: -3rem;
+        width: 10rem;
+        height: 10rem;
+        z-index: 1;
+        opacity: 0.1;
+        pointer-events: none;
+      }
+
+      /* Chat animations */
+      .user-message {
+        animation: slideFromRight 0.4s forwards;
+      }
+
+      .ai-message {
+        animation: slideFromLeft 0.5s forwards;
+        animation-delay: 0.5s;
+        opacity: 0;
+        transform: translateX(-2rem);
+      }
+
+      @keyframes slideFromRight {
+        from {
+          opacity: 0;
+          transform: translateX(2rem);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      @keyframes slideFromLeft {
+        from {
+          opacity: 0;
+          transform: translateX(-2rem);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      /* Responsive styles for chat simulation */
+      @media screen and (max-width: 992px) {
+        .chat-window {
+          padding: 2rem;
+          min-height: 35rem;
+        }
+      }
+
+      @media screen and (max-width: 576px) {
+        .chat-window {
+          padding: 1.5rem;
+          min-height: 30rem;
+        }
+
+        .chat-header {
+          padding-bottom: 1rem;
+        }
+
+        .chat-avatar,
+        .message-avatar {
+          width: 3rem;
+          height: 3rem;
+        }
+
+        .chat-avatar i,
+        .message-avatar i {
+          font-size: 1.6rem;
+        }
+
+        .message-content {
+          padding: 1.2rem;
+          font-size: 1.4rem;
+        }
+
+        .suggestion-chip {
+          padding: 0.7rem 1.2rem;
+          font-size: 1.3rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Preloader -->
+    <div class="preloader">
+      <div class="crescent-loader">
+        <div class="crescent"></div>
+        <div class="star star-1"></div>
+        <div class="star star-2"></div>
+        <div class="star star-3"></div>
+      </div>
+      <div class="loading-text">
+        <span>B</span>
+        <span>I</span>
+        <span>S</span>
+        <span>M</span>
+        <span>I</span>
+        <span>L</span>
+        <span>L</span>
+        <span>A</span>
+        <span>H</span>
+      </div>
+    </div>
+
+    <div class="app-container">
+      <nav class="main-nav">
+        <div class="nav-container">
+          <div class="logo">
+            <div class="logo-icon">
+              <i class="fas fa-moon"></i>
+            </div>
+            <div class="logo-text">
+              <h1>NoorAI</h1>
+              <span class="tagline">Islamic Knowledge</span>
+            </div>
+          </div>
+
+          <div class="menu-toggle" id="menu-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+
+          <ul class="nav-links">
+            <li><a href="#hero" class="nav-link">Home</a></li>
+            <li><a href="#ai-assistant" class="nav-link">AI Assistant</a></li>
+            <li><a href="#prayer-section" class="nav-link">Prayer</a></li>
+            <li><a href="#about" class="nav-link">About</a></li>
+          </ul>
+        </div>
+      </nav>
+
+      <section id="hero" class="hero-section">
+        <div class="hero-sky"></div>
+        <div class="hero-stars"></div>
+        <div class="hero-dunes"></div>
+        <div class="shooting-star"></div>
+        <div class="shooting-star"></div>
+        <div class="shooting-star"></div>
+
+        <div class="hero-container">
+          <div class="hero-content">
+            <h1 class="hero-title">Explore Islamic Knowledge</h1>
+            <p class="hero-subtitle">
+              NoorAI is your intelligent companion for discovering and
+              understanding Islamic teachings, guided by the wisdom of the Quran
+              and Hadith through advanced AI technology.
+            </p>
+            <div class="arabic-title">اللهم علمنا ما ينفعنا</div>
+          </div>
+          <div class="hero-visual">
+            <div class="visual-decorations">
+              <div class="decoration decoration-1"></div>
+              <div class="decoration decoration-2"></div>
+              <div class="decoration decoration-3"></div>
+              <div class="decoration decoration-4"></div>
+            </div>
+            <div class="main-visual">
+              <div class="lantern">
+                <i class="fas fa-moon"></i>
+              </div>
+            </div>
+            <div class="crescent"></div>
+            <div class="star star-1"></div>
+            <div class="star star-2"></div>
+            <div class="star star-3"></div>
+            <div class="star star-4"></div>
+            <div class="star star-5"></div>
+          </div>
+        </div>
+
+        <div class="scroll-indicator">
+          <div class="scroll-text">Scroll to explore</div>
+          <div class="scroll-icon">
+            <i class="fas fa-chevron-down"></i>
+          </div>
+        </div>
+
+        <div class="shape-divider">
+          <svg
+            data-name="Layer 1"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 1200 120"
+            preserveAspectRatio="none"
+          >
+            <path
+              d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"
+              class="shape-fill"
+            ></path>
+          </svg>
+        </div>
+      </section>
+
+      <section id="ai-assistant" class="ai-search-section">
+        <div class="section-container">
+          <div class="section-header">
+            <div class="section-title-container">
+              <h2>Islamic AI Assistant</h2>
+              <div class="decorative-line"></div>
+            </div>
+            <p class="section-subtitle">
+              Ask questions and receive answers guided by Islamic knowledge
+            </p>
+            <div class="arabic-label">المساعد الإسلامي الذكي</div>
+          </div>
+
+          <div class="ai-assistant-content">
+            <div class="ai-info">
+              <h3>Your Knowledge Guide</h3>
+              <p>
+                NoorAI is designed to help you explore Islamic teachings,
+                understand Quranic verses, learn about Hadith, and discover
+                answers to questions about faith, practice, and history—all
+                through an AI assistant specifically trained on authentic
+                Islamic sources.
+              </p>
+
+              <div class="ai-benefits">
+                <div class="benefit-item">
+                  <div class="benefit-icon">
+                    <i class="fas fa-book-quran"></i>
+                  </div>
+                  <span
+                    >Ask about Quranic verses and their interpretations</span
+                  >
+                </div>
+                <div class="benefit-item">
+                  <div class="benefit-icon">
+                    <i class="fas fa-mosque"></i>
+                  </div>
+                  <span>Learn about Islamic practices and rituals</span>
+                </div>
+                <div class="benefit-item">
+                  <div class="benefit-icon">
+                    <i class="fas fa-star-and-crescent"></i>
+                  </div>
+                  <span>Explore the life of Prophet Muhammad ﷺ</span>
+                </div>
+                <div class="benefit-item">
+                  <div class="benefit-icon">
+                    <i class="fas fa-pray"></i>
+                  </div>
+                  <span>Get guidance on contemporary Islamic questions</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="chat-simulation">
+              <div class="chat-window">
+                <div class="chat-header">
+                  <div class="chat-avatar">
+                    <i class="fas fa-robot"></i>
+                  </div>
+                  <div class="chat-title">NoorAI Assistant</div>
+                </div>
+
+                <div class="chat-messages">
+                  <div class="message user-message">
+                    <div class="message-content">
+                      What does the Quran say about seeking knowledge?
+                    </div>
+                  </div>
+
+                  <div class="message ai-message">
+                    <div class="message-avatar">
+                      <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                      <div class="typing-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="chat-suggestion-chips">
+                  <div class="suggestion-chip">Prayer times</div>
+                  <div class="suggestion-chip">Fasting in Islam</div>
+                  <div class="suggestion-chip">Hajj rituals</div>
+                </div>
+
+                <div class="chat-decoration">
+                  <div class="decoration-element"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="begin-button-container">
+            <a href="/chat" class="begin-button">
+              <span class="begin-bismillah">بسم الله</span>
+              <span class="begin-text">Begin in the name of Allah</span>
+            </a>
+            <p class="begin-caption">
+              Start your journey of Islamic knowledge discovery
+            </p>
+          </div>
+        </div>
+
+        <div class="section-stars ai-search-stars">
+          <div class="star-tiny"></div>
+          <div class="star-tiny"></div>
+          <div class="star-small"></div>
+          <div class="star-small"></div>
+          <div class="star-medium"></div>
+          <div class="star-tiny"></div>
+          <div class="star-tiny"></div>
+          <div class="star-small"></div>
+          <div class="section-moon moon-small"></div>
+        </div>
+
+        <div class="shape-divider">
+          <svg
+            data-name="Layer 1"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 1200 120"
+            preserveAspectRatio="none"
+          >
+            <path
+              d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"
+              class="shape-fill"
+            ></path>
+          </svg>
+        </div>
+      </section>
+      <section id="prayer-section" class="prayer-section">
+        <div class="section-container">
+          <div class="prayer-content">
+            <h2>Remember Allah in Prayer</h2>
+            <p>
+              Maintain your connection with Allah through regular prayer and
+              devotion
+            </p>
+            <div class="prayer-decoration">
+              <div class="prayer-dome"></div>
+              <div class="prayer-arch"></div>
+            </div>
+            <div class="arabic-dua">
+              إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَوْقُوتًا
+            </div>
+            <p class="dua-translation">
+              "Indeed, prayer has been decreed upon the believers at specified
+              times"
+            </p>
+          </div>
+        </div>
+
+        <div class="section-stars prayer-stars">
+          <div class="star-tiny"></div>
+          <div class="star-tiny"></div>
+          <div class="star-small"></div>
+          <div class="star-small"></div>
+          <div class="star-medium"></div>
+          <div class="star-tiny"></div>
+          <div class="star-tiny"></div>
+          <div class="star-small"></div>
+          <div class="section-moon moon-small"></div>
+        </div>
+
+        <div class="shape-divider">
+          <svg
+            data-name="Layer 1"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 1200 120"
+            preserveAspectRatio="none"
+          >
+            <path
+              d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"
+              class="shape-fill"
+            ></path>
+          </svg>
+        </div>
+      </section>
+
+      <!-- About Section (Moved to bottom) -->
+      <section id="about" class="about-section">
+        <div class="section-container">
+          <div class="section-header">
+            <div class="section-title-container">
+              <h2>About NoorAI</h2>
+              <div class="decorative-line"></div>
+            </div>
+            <p class="section-subtitle">
+              Bringing Islamic knowledge to the digital age
+            </p>
+            <div class="arabic-label">حول نور</div>
+          </div>
+
+          <div class="about-content">
+            <div class="about-text">
+              <p>
+                NoorAI is designed to make Islamic knowledge accessible to
+                everyone through advanced artificial intelligence trained on
+                authenticated Islamic sources, including the Quran, Hadith
+                collections, and scholarly works.
+              </p>
+
+              <div class="quran-quote">
+                <div class="quote-icon"><i class="fas fa-quote-right"></i></div>
+                <p class="arabic-text">
+                  يَرْفَعِ اللَّهُ الَّذِينَ آمَنُوا مِنكُمْ وَالَّذِينَ أُوتُوا
+                  الْعِلْمَ دَرَجَاتٍ
+                </p>
+                <p class="quote-translation">
+                  "Allah will raise those who have believed among you and those
+                  who were given knowledge, by degrees." - Quran 58:11
+                </p>
+              </div>
+
+              <p>
+                Our mission is to provide accurate, nuanced answers to your
+                questions about Islam, helping both Muslims and those interested
+                in Islam to explore the faith with confidence. NoorAI combines
+                the timeless wisdom of Islamic teachings with the accessibility
+                of modern technology.
+              </p>
+            </div>
+
+            <div class="app-visual">
+              <div class="visual-container">
+                <div class="app-decoration mosque-silhouette"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stars and moon for about section -->
+        <div class="section-stars about-stars">
+          <div class="star-tiny"></div>
+          <div class="star-tiny"></div>
+          <div class="star-small"></div>
+          <div class="star-small"></div>
+          <div class="star-medium"></div>
+          <div class="star-tiny"></div>
+          <div class="star-tiny"></div>
+          <div class="section-moon moon-large"></div>
+        </div>
+        <div class="shape-divider">
+          <svg
+            data-name="Layer 1"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 1200 120"
+            preserveAspectRatio="none"
+          >
+            <path
+              d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"
+              class="shape-fill"
+            ></path>
+          </svg>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <div class="footer-container">
+          <div class="footer-top">
+            <div class="footer-logo">
+              <div class="logo-icon">
+                <i class="fas fa-moon"></i>
+              </div>
+              <div class="logo-text">
+                <h2>NoorAI</h2>
+                <span class="arabic-footer">نور</span>
+              </div>
+            </div>
+
+            <div class="footer-links">
+              <div class="footer-menu">
+                <h3>Navigation</h3>
+                <ul>
+                  <li><a href="#hero">Home</a></li>
+                  <li><a href="#ai-assistant">AI Assistant</a></li>
+                  <li><a href="#prayer-section">Prayer</a></li>
+                  <li><a href="#about">About</a></li>
+                </ul>
+              </div>
+
+              <div class="footer-social">
+                <h3>Connect</h3>
+                <div class="social-links">
+                  <a href="#" class="social-icon"
+                    ><i class="fab fa-facebook-f"></i
+                  ></a>
+                  <a href="#" class="social-icon"
+                    ><i class="fab fa-twitter"></i
+                  ></a>
+                  <a href="#" class="social-icon"
+                    ><i class="fab fa-instagram"></i
+                  ></a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="footer-bottom">
+            <p>
+              &copy; <span id="year">2025</span> NoorAI. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script src="{{ url_for('static', path='js/script.js') }}"></script>
+
+    <script>
+      function initChatSimulation() {
+        const chatMessages = document.querySelector(".chat-messages");
+        const aiMessage = document.querySelector(".ai-message");
+        const typingIndicator = document.querySelector(".typing-indicator");
+        const suggestionChips = document.querySelectorAll(".suggestion-chip");
+
+        const responses = [
+          `The Quran highly values seeking knowledge. In Surah Al-Alaq (96:1-5), the first revelation to Prophet Muhammad ﷺ begins with "Read!" (اقْرَأْ). In Surah Ta-Ha (20:114), Allah says "...say, 'My Lord, increase me in knowledge.'" The Quran also states in Surah Az-Zumar (39:9): "Are those who know equal to those who do not know?"`,
+
+          `Fasting (Sawm) is one of the Five Pillars of Islam. The Quran states in Surah Al-Baqarah (2:183): "O you who believe, fasting is prescribed for you as it was prescribed for those before you, that you may become righteous." Fasting during Ramadan helps develop self-discipline, empathy for the less fortunate, and spiritual growth.`,
+
+          `The five daily prayers (Salah) are Fajr (dawn), Dhuhr (noon), Asr (afternoon), Maghrib (sunset), and Isha (night). The Quran mentions in Surah Al-Isra (17:78): "Establish prayer at the decline of the sun until the darkness of the night and the Quran of dawn. Indeed, the recitation of dawn is ever witnessed."`,
+
+          `Hajj is the annual Islamic pilgrimage to Mecca, required once in a lifetime for those who are physically and financially able. The rituals include Tawaf (circling the Kaaba), Sa'i (walking between Safa and Marwa), standing at Arafat, and stoning the pillars representing Satan.`,
+        ];
+
+        function simulateResponse() {
+          setTimeout(() => {
+            typingIndicator.style.display = "none";
+
+            const messageContent = aiMessage.querySelector(".message-content");
+            messageContent.innerHTML = responses[0]; // Use the first response
+
+            // Show suggestion chips after response is shown
+            setTimeout(() => {
+              suggestionChips.forEach((chip) => {
+                chip.style.opacity = "1";
+                chip.style.transform = "translateY(0)";
+              });
+            }, 500);
+          }, 3000);
+        }
+
+        function cycleMessages() {
+          let currentIndex = 0;
+          const questions = [
+            "What does the Quran say about seeking knowledge?",
+            "Tell me about fasting in Islam",
+            "What are the five daily prayers?",
+            "Can you explain the rituals of Hajj?",
+          ];
+
+          setInterval(() => {
+            currentIndex = (currentIndex + 1) % questions.length;
+
+            const userMessage = document.querySelector(
+              ".user-message .message-content"
+            );
+            userMessage.textContent = questions[currentIndex];
+            userMessage.style.animation = "none";
+            setTimeout(() => {
+              userMessage.style.animation = "slideFromRight 0.4s forwards";
+            }, 10);
+
+            typingIndicator.style.display = "flex";
+
+            suggestionChips.forEach((chip) => {
+              chip.style.opacity = "0";
+              chip.style.transform = "translateY(1rem)";
+            });
+
+            setTimeout(() => {
+              typingIndicator.style.display = "none";
+
+              const messageContent =
+                aiMessage.querySelector(".message-content");
+              messageContent.innerHTML = responses[currentIndex];
+              messageContent.style.animation = "none";
+              setTimeout(() => {
+                messageContent.style.animation = "slideFromLeft 0.5s forwards";
+              }, 10);
+
+              setTimeout(() => {
+                suggestionChips.forEach((chip) => {
+                  chip.style.opacity = "1";
+                  chip.style.transform = "translateY(0)";
+                });
+              }, 500);
+            }, 3000);
+          }, 12000);
+        }
+
+        function initMessageCycle() {
+          simulateResponse();
+
+          suggestionChips.forEach((chip, index) => {
+            chip.addEventListener("click", () => {
+              const userMessage = document.querySelector(
+                ".user-message .message-content"
+              );
+              userMessage.textContent = chip.textContent;
+              userMessage.style.animation = "none";
+              setTimeout(() => {
+                userMessage.style.animation = "slideFromRight 0.4s forwards";
+              }, 10);
+
+              typingIndicator.style.display = "flex";
+
+              suggestionChips.forEach((c) => {
+                c.style.opacity = "0";
+                c.style.transform = "translateY(1rem)";
+              });
+
+              setTimeout(() => {
+                typingIndicator.style.display = "none";
+
+                const messageContent =
+                  aiMessage.querySelector(".message-content");
+                messageContent.innerHTML = responses[index] || responses[0];
+                messageContent.style.animation = "none";
+                setTimeout(() => {
+                  messageContent.style.animation =
+                    "slideFromLeft 0.5s forwards";
+                }, 10);
+
+                setTimeout(() => {
+                  suggestionChips.forEach((c) => {
+                    c.style.opacity = "1";
+                    c.style.transform = "translateY(0)";
+                  });
+                }, 500);
+              }, 3000);
+            });
+          });
+
+          setTimeout(() => {
+            cycleMessages();
+          }, 15000);
+        }
+
+        initMessageCycle();
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                initChatSimulation();
+                observer.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.3 }
+        );
+
+        const aiSection = document.getElementById("ai-assistant");
+        if (aiSection) {
+          observer.observe(aiSection);
+        }
+      });
+    </script>
+  </body>
+</html>

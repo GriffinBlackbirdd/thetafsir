@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NoorAI Chat | Islamic Knowledge Assistant</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', path='/css/styles.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', path='/css/chat.css') }}"
+    />
+    <!-- Google Fonts - Noto Naskh Arabic for Arabic & Poppins for English -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      rel="shortcut icon"
+      href="{{ url_for('static', path='/images/favicon.ico') }}"
+      type="image/x-icon"
+    />
+  </head>
+  <body class="chat-page">
+    <!-- Header -->
+    <header class="chat-header">
+      <div class="header-container">
+        <a href="/" class="logo-link">
+          <div class="logo">
+            <div class="logo-icon">
+              <i class="fas fa-moon"></i>
+            </div>
+            <div class="logo-text">
+              <h1>NoorAI</h1>
+              <span class="tagline">Islamic Knowledge</span>
+            </div>
+          </div>
+        </a>
+        <nav class="chat-nav">
+          <div class="user-info">
+            <div class="user-avatar">
+              <i class="fas fa-user"></i>
+            </div>
+            <div class="user-dropdown" id="user-dropdown">
+              <span class="user-name">{{ user.first_name }}</span>
+              <i class="fas fa-chevron-down"></i>
+              <div class="dropdown-menu" id="dropdown-menu">
+                <a href="/profile" class="dropdown-item">
+                  <i class="fas fa-user-circle"></i>
+                  <span>Profile</span>
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="/logout" class="dropdown-item">
+                  <i class="fas fa-sign-out-alt"></i>
+                  <span>Logout</span>
+                </a>
+              </div>
+            </div>
+          </div>
+          <a href="/" class="nav-button">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Main Chat Interface -->
+    <main class="chat-main">
+      <div class="chat-container">
+        <div class="bismillah-container">
+          <div class="bismillah">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</div>
+          <div class="bismillah-translation">
+            In the name of Allah, the Most Gracious, the Most Merciful
+          </div>
+          <button id="clear-chat" class="clear-button">
+            <i class="fas fa-trash"></i> Clear Chat
+          </button>
+        </div>
+
+        <!-- Two column layout -->
+        <div class="chat-body">
+          <!-- Main chat column -->
+          <div class="chat-column">
+            <div class="messages-container" id="messages">
+              <!-- Welcome message -->
+              <div class="message ai-message">
+                <div class="message-avatar">
+                  <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content">
+                  <p>
+                    Assalamu alaikum! I'm NoorAI, your Islamic knowledge
+                    assistant. How can I help you learn about Islam today?
+                  </p>
+                </div>
+              </div>
+              <!-- Messages will be added here dynamically -->
+            </div>
+
+            <form class="input-container" id="message-form">
+              <div class="input-wrapper">
+                <input
+                  type="text"
+                  id="user-input"
+                  placeholder="Ask about Islamic knowledge..."
+                  autocomplete="off"
+                />
+              </div>
+              <button type="submit" class="send-button">
+                <i class="fas fa-paper-plane"></i>
+              </button>
+            </form>
+          </div>
+
+          <!-- Sidebar column -->
+          <div class="sidebar-column">
+            <!-- Suggested questions section -->
+            <div class="chat-suggestions" id="suggestions">
+              <div class="suggestion-title">Suggested Questions</div>
+              <div class="suggestion-items">
+                <button class="suggestion-item">
+                  <i class="fas fa-star-and-crescent"></i>
+                  <span>What are the five pillars of Islam?</span>
+                </button>
+                <button class="suggestion-item">
+                  <i class="fas fa-book-quran"></i>
+                  <span>Tell me about the revelation of the Quran</span>
+                </button>
+                <button class="suggestion-item">
+                  <i class="fas fa-pray"></i>
+                  <span>How do I perform Salah (prayer)?</span>
+                </button>
+                <button class="suggestion-item">
+                  <i class="fas fa-kaaba"></i>
+                  <span>What is the significance of Hajj?</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Debug panel -->
+    <!-- <button id="debug-toggle">Debug</button> -->
+    <div id="debug-panel">
+      <div id="debug-log"></div>
+    </div>
+
+    <!-- Starry Background -->
+    <div class="chat-background">
+      <div class="stars-container">
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+      </div>
+      <div class="moon"></div>
+    </div>
+
+    <!-- Inline JavaScript -->
+    <script src="{{ url_for('static', path='/js/moveButton.js') }}"></script>
+    <script src="{{ url_for('static', path='/js/chat.js') }}"></script>
+  </body>
+</html>

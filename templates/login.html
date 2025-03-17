@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login | NoorAI</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', path='/css/styles.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', path='/css/auth.css') }}"
+    />
+    <!-- Google Fonts - Noto Naskh Arabic for Arabic & Poppins for English -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Font Awesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      rel="shortcut icon"
+      href="{{ url_for('static', path='/images/favicon.ico') }}"
+      type="image/x-icon"
+    />
+  </head>
+  <body class="auth-page">
+    <div class="auth-container">
+      <div class="auth-box">
+        <div class="auth-header">
+          <a href="/" class="logo-link">
+            <div class="logo">
+              <div class="logo-icon">
+                <i class="fas fa-moon"></i>
+              </div>
+              <div class="logo-text">
+                <h1>NoorAI</h1>
+                <span class="tagline">Islamic Knowledge</span>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        <div class="auth-bismillah">
+          <span>بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</span>
+          <p>In the name of Allah, the Most Gracious, the Most Merciful</p>
+        </div>
+
+        <h2 class="auth-title">Login to Your Account</h2>
+
+        {% if message %}
+        <div class="auth-message {{ message_type }}">
+          <i
+            class="fas fa-{{ 'check-circle' if message_type == 'success' else 'exclamation-circle' }}"
+          ></i>
+          <span>{{ message }}</span>
+        </div>
+        {% endif %}
+
+        <form class="auth-form" action="/login" method="post" id="login-form">
+          <div class="form-group">
+            <label for="email">
+              <i class="fas fa-envelope"></i>
+              <span>Email Address</span>
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="Enter your email address"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password">
+              <i class="fas fa-lock"></i>
+              <span>Password</span>
+            </label>
+            <div class="password-input">
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Enter your password"
+                required
+              />
+              <button type="button" class="toggle-password">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-options">
+            <div class="form-checkbox">
+              <input type="checkbox" id="remember" name="remember" />
+              <label for="remember">Remember me</label>
+            </div>
+            <a href="/forgot-password" class="forgot-link">Forgot password?</a>
+          </div>
+
+          <button type="submit" class="auth-button" id="login-button">
+            Login to Account
+          </button>
+        </form>
+
+        <div class="auth-footer">
+          <p>Don't have an account? <a href="/register">Register Now</a></p>
+        </div>
+      </div>
+
+      <div class="auth-background">
+        <div class="stars-container">
+          <div class="star"></div>
+          <div class="star"></div>
+          <div class="star"></div>
+          <div class="star"></div>
+          <div class="star"></div>
+          <div class="star"></div>
+          <div class="star"></div>
+          <div class="star"></div>
+          <div class="star"></div>
+          <div class="star"></div>
+        </div>
+        <div class="moon"></div>
+        <div class="mosque"></div>
+      </div>
+    </div>
+
+    <script>
+      // Toggle password visibility
+      document
+        .querySelector(".toggle-password")
+        .addEventListener("click", function () {
+          const passwordInput = document.getElementById("password");
+          const icon = this.querySelector("i");
+
+          if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
+          } else {
+            passwordInput.type = "password";
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+          }
+        });
+
+      // Handle form submission
+      document
+        .getElementById("login-form")
+        .addEventListener("submit", function (e) {
+          const loginButton = document.getElementById("login-button");
+          loginButton.innerHTML =
+            '<i class="fas fa-spinner fa-spin"></i> Signing in...';
+          loginButton.disabled = true;
+        });
+    </script>
+  </body>
+</html>
