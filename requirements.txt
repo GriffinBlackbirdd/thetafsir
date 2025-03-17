@@ -61,7 +61,7 @@ filetype
 flask
 flatbuffers
 frozenlist
-fsspec
+fsspec==2024.9.0
 gitdb
 gitpython
 google-auth
