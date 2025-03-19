@@ -43,8 +43,8 @@ LIFETIME_ACCESS_COST = 89
 # Set up Razorpay (you'll need to sign up for a Razorpay account)
 import razorpay
 
-RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "rzp_test_zZDvredBawObm6")
-RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "gpfb8quY17d1E0ypTtHHaO1B")
+RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID", "rzp_live_iM7Oq8b0JNtyoX")
+RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET", "jTZkWEp5etd83BBYVG1PTQQs")
 
 razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
@@ -164,6 +164,7 @@ async def home(request: Request, access_token: Optional[str] = Cookie(None)):
 
 # Add these route handlers after your existing routes
 
+
 @app.get("/terms", response_class=HTMLResponse)
 async def terms_page(request: Request):
     """Render the terms and conditions page"""
@@ -186,6 +187,7 @@ async def refund_page(request: Request):
 async def contact_page(request: Request):
     """Render the contact information page"""
     return templates.TemplateResponse("contact.html", {"request": request})
+
 
 @app.get("/login", response_class=HTMLResponse)
 async def login_page(
