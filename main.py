@@ -162,6 +162,31 @@ async def home(request: Request, access_token: Optional[str] = Cookie(None)):
     return templates.TemplateResponse("index.html", {"request": request, "user": user})
 
 
+# Add these route handlers after your existing routes
+
+@app.get("/terms", response_class=HTMLResponse)
+async def terms_page(request: Request):
+    """Render the terms and conditions page"""
+    return templates.TemplateResponse("terms.html", {"request": request})
+
+
+@app.get("/privacy", response_class=HTMLResponse)
+async def privacy_page(request: Request):
+    """Render the privacy policy page"""
+    return templates.TemplateResponse("privacy.html", {"request": request})
+
+
+@app.get("/refund", response_class=HTMLResponse)
+async def refund_page(request: Request):
+    """Render the refund and cancellation policy page"""
+    return templates.TemplateResponse("refundPolicy.html", {"request": request})
+
+
+@app.get("/contact", response_class=HTMLResponse)
+async def contact_page(request: Request):
+    """Render the contact information page"""
+    return templates.TemplateResponse("contact.html", {"request": request})
+
 @app.get("/login", response_class=HTMLResponse)
 async def login_page(
     request: Request, message: Optional[str] = None, message_type: Optional[str] = None
