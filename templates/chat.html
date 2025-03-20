@@ -54,18 +54,6 @@
               <span class="user-name">{{ user.first_name }}</span>
               <i class="fas fa-chevron-down"></i>
               <div class="dropdown-menu" id="dropdown-menu">
-                <div class="dropdown-user-info">
-                  <div class="dropdown-avatar">
-                    <i class="fas fa-user"></i>
-                  </div>
-                  <div class="dropdown-details">
-                    <span class="dropdown-fullname"
-                      >{{ user.first_name }} {{ user.last_name }}</span
-                    >
-                    <span class="dropdown-email">{{ user.email }}</span>
-                  </div>
-                </div>
-                <div class="dropdown-divider"></div>
                 <a href="/profile" class="dropdown-item">
                   <i class="fas fa-user-circle"></i>
                   <span>Profile</span>
@@ -78,15 +66,10 @@
               </div>
             </div>
           </div>
-          <div class="nav-buttons">
-            <button id="toggle-sidebar" class="nav-button mobile-only">
-              <i class="fas fa-bars"></i>
-            </button>
-            <a href="/" class="nav-button">
-              <i class="fas fa-home"></i>
-              <span>Home</span>
-            </a>
-          </div>
+          <a href="/" class="nav-button">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+          </a>
         </nav>
       </div>
     </header>
@@ -94,143 +77,125 @@
     <!-- Main Chat Interface -->
     <main class="chat-main">
       <div class="chat-container">
-        <!-- Sidebar -->
-        <aside class="chat-sidebar" id="chat-sidebar">
-          <div class="sidebar-header">
-            <h2><i class="fas fa-star-and-crescent"></i> TafsirAI</h2>
-            <button id="close-sidebar" class="close-sidebar mobile-only">
-              <i class="fas fa-times"></i>
-            </button>
+        <div class="bismillah-container">
+          <div class="bismillah">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</div>
+          <div class="bismillah-translation">
+            In the name of Allah, the Most Gracious, the Most Merciful
           </div>
+          <button id="clear-chat" class="clear-button">
+            <i class="fas fa-trash"></i> Clear Chat
+          </button>
+        </div>
 
-          <!-- Credits information panel -->
-          <div class="credit-panel" id="credit-panel">
-            <div class="credit-title">
-              <i class="fas fa-coins"></i>
-              <span>Your Credits</span>
+        <!-- Two column layout -->
+        <div class="chat-body">
+          <!-- Main chat column -->
+          <div class="chat-column">
+            <div class="messages-container" id="messages">
+              <!-- Welcome message -->
+              <div class="message ai-message">
+                <div class="message-avatar">
+                  <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content">
+                  <p>
+                    Assalamu alaikum! I'm TafsirAI, your Islamic knowledge
+                    assistant. How can I help you learn about Islam today?
+                  </p>
+                </div>
+              </div>
+              <!-- Messages will be added here dynamically -->
             </div>
 
-            <div class="credit-info" id="credit-free-info">
-              <div class="credit-count">
-                <span id="credits-remaining"
-                  >{{ user.credits_remaining if not user.has_lifetime_access
-                  else "∞" }}</span
-                >
-                <span class="credit-label"
-                  >{{ "free credits remaining" if not user.has_lifetime_access
-                  else "Lifetime Access" }}</span
-                >
+            <form class="input-container" id="message-form">
+              <div class="input-wrapper">
+                <input
+                  type="text"
+                  id="user-input"
+                  placeholder="Ask about Islamic knowledge..."
+                  autocomplete="off"
+                />
+              </div>
+              <button type="submit" class="send-button">
+                <i class="fas fa-paper-plane"></i>
+              </button>
+            </form>
+          </div>
+
+          <!-- Sidebar column -->
+          <div class="sidebar-column">
+            <!-- Credits information panel -->
+            <div class="credit-panel" id="credit-panel">
+              <div class="credit-title">
+                <i class="fas fa-coins"></i>
+                <span>Your Credits</span>
               </div>
 
-              {% if not user.has_lifetime_access %}
-              <div class="credit-progress">
-                <div class="progress-bar">
-                  <div
-                    class="progress-fill"
-                    style="width: {{ (user.credits_remaining / 3) * 100 }}%;"
-                  ></div>
+              <div class="credit-info" id="credit-free-info">
+                <div class="credit-count">
+                  <span id="credits-remaining"
+                    >{{ user.credits_remaining if not user.has_lifetime_access
+                    else "∞" }}</span
+                  >
+                  <span class="credit-label"
+                    >{{ "free credits remaining" if not user.has_lifetime_access
+                    else "Lifetime Access" }}</span
+                  >
                 </div>
-                <div class="progress-text">
-                  {{ user.credits_remaining }} of 3 free messages
-                </div>
-              </div>
 
-              <div class="upgrade-button-container">
-                <button id="upgrade-button" class="upgrade-button">
-                  <i class="fas fa-crown"></i> Upgrade to Lifetime Access
+                {% if not user.has_lifetime_access %}
+                <div class="credit-progress">
+                  <div class="progress-bar">
+                    <div
+                      class="progress-fill"
+                      style="width: {{ (user.credits_remaining / 3) * 100 }}%;"
+                    ></div>
+                  </div>
+                  <div class="progress-text">
+                    {{ user.credits_remaining }} of 3 free messages
+                  </div>
+                </div>
+
+                <div class="upgrade-button-container">
+                  <button id="upgrade-button" class="upgrade-button">
+                    <i class="fas fa-crown"></i> Upgrade to Lifetime Access
+                  </button>
+                  <div class="upgrade-price">
+                    Just ₹{{ payment_amount }} - One-time payment
+                  </div>
+                </div>
+                {% else %}
+                <div class="lifetime-badge">
+                  <i class="fas fa-check-circle"></i>
+                  <span>You have lifetime access!</span>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Suggested questions section -->
+            <div class="chat-suggestions" id="suggestions">
+              <!-- <div class="suggestion-title">Suggested Questions</div>
+              <div class="suggestion-items">
+                <button class="suggestion-item">
+                  <i class="fas fa-star-and-crescent"></i>
+                  <span>What are the five pillars of Islam?</span>
                 </button>
-                <div class="upgrade-price">
-                  Just ₹{{ payment_amount }} - One-time payment
-                </div>
-              </div>
-              {% else %}
-              <div class="lifetime-badge">
-                <i class="fas fa-check-circle"></i>
-                <span>You have lifetime access!</span>
-              </div>
-              {% endif %}
+                <button class="suggestion-item">
+                  <i class="fas fa-book-quran"></i>
+                  <span>Tell me about the revelation of the Quran</span>
+                </button>
+                <button class="suggestion-item">
+                  <i class="fas fa-pray"></i>
+                  <span>How do I perform Salah (prayer)?</span>
+                </button>
+                <button class="suggestion-item">
+                  <i class="fas fa-kaaba"></i>
+                  <span>What is the significance of Hajj?</span>
+                </button>
+              </div> -->
             </div>
           </div>
-
-          <!-- Suggested questions section -->
-          <div class="chat-suggestions" id="suggestions">
-            <div class="suggestion-title">Suggested Questions</div>
-            <div class="suggestion-items">
-              <button class="suggestion-item">
-                <i class="fas fa-star-and-crescent"></i>
-                <span>What are the five pillars of Islam?</span>
-              </button>
-              <button class="suggestion-item">
-                <i class="fas fa-book-quran"></i>
-                <span>Tell me about the revelation of the Quran</span>
-              </button>
-              <button class="suggestion-item">
-                <i class="fas fa-pray"></i>
-                <span>How do I perform Salah (prayer)?</span>
-              </button>
-              <button class="suggestion-item">
-                <i class="fas fa-kaaba"></i>
-                <span>What is the significance of Hajj?</span>
-              </button>
-              <button class="suggestion-item">
-                <i class="fas fa-mosque"></i>
-                <span>What is the importance of Ramadan?</span>
-              </button>
-              <button class="suggestion-item">
-                <i class="fas fa-hands-helping"></i>
-                <span>How should I give Zakat?</span>
-              </button>
-            </div>
-          </div>
-
-          <div class="clear-button-container">
-            <button id="clear-chat" class="clear-button">
-              <i class="fas fa-trash"></i> Clear Chat
-            </button>
-          </div>
-        </aside>
-
-        <!-- Main chat column -->
-        <div class="chat-column">
-          <div class="bismillah-container">
-            <div class="bismillah">بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</div>
-            <div class="bismillah-translation">
-              In the name of Allah, the Most Gracious, the Most Merciful
-            </div>
-          </div>
-
-          <div class="messages-container" id="messages">
-            <!-- Welcome message -->
-            <div class="message ai-message">
-              <div class="message-avatar">
-                <i class="fas fa-robot"></i>
-              </div>
-              <div class="message-content">
-                <p>
-                  Assalamu alaikum! I'm TafsirAI, your Islamic knowledge
-                  assistant. How can I help you learn about Islam today?
-                </p>
-              </div>
-            </div>
-            <!-- Messages will be added here dynamically -->
-          </div>
-
-          <form class="input-container" id="message-form">
-            <div class="input-wrapper">
-              <input
-                type="text"
-                id="user-input"
-                placeholder="Ask about Islamic knowledge..."
-                autocomplete="off"
-              />
-              <button type="button" class="input-action-button">
-                <i class="fas fa-microphone"></i>
-              </button>
-            </div>
-            <button type="submit" class="send-button">
-              <i class="fas fa-paper-plane"></i>
-            </button>
-          </form>
         </div>
       </div>
     </main>
@@ -336,6 +301,12 @@
       </div>
     </div>
 
+    <!-- Debug panel -->
+    <!-- <button id="debug-toggle">Debug</button> -->
+    <div id="debug-panel">
+      <div id="debug-log"></div>
+    </div>
+
     <!-- Starry Background -->
     <div class="chat-background">
       <div class="stars-container">
@@ -371,35 +342,6 @@
         const closeSuccessModal = document.querySelector(".close-success-modal");
         const closeCreditModal = document.querySelector(".close-credit-modal");
         const continueButton = document.getElementById("continue-button");
-
-        // Sidebar toggle for mobile
-        const toggleSidebarBtn = document.getElementById("toggle-sidebar");
-        const closeSidebarBtn = document.getElementById("close-sidebar");
-        const sidebar = document.getElementById("chat-sidebar");
-
-        if (toggleSidebarBtn) {
-          toggleSidebarBtn.addEventListener("click", function() {
-            sidebar.classList.add("active");
-            document.body.style.overflow = "hidden"; // Prevent body scrolling
-          });
-        }
-
-        if (closeSidebarBtn) {
-          closeSidebarBtn.addEventListener("click", function() {
-            sidebar.classList.remove("active");
-            document.body.style.overflow = ""; // Restore body scrolling
-          });
-        }
-
-        // Close sidebar when clicking outside on mobile
-        document.addEventListener("click", function(e) {
-          if (sidebar && sidebar.classList.contains("active") &&
-              !sidebar.contains(e.target) &&
-              e.target !== toggleSidebarBtn) {
-            sidebar.classList.remove("active");
-            document.body.style.overflow = "";
-          }
-        });
 
         // User data from server
         const userData = {
